@@ -203,8 +203,32 @@ impl ImplMonitor {
     }
 
     pub fn capture_part(&self, x: i32, y: i32, width: i32, height: i32) -> XCapResult<RgbaImage> {
+        let monitor_rect = unsafe { CGDisplayBounds(self.cg_direct_display_id) };
+
+        if x < 0 || y < 0 {
+            return Err(XCapError::new("Capture part x or y is negative"));
+        }
+        if width <= 0 || height <= 0 {
+            return Err(XCapError::new("Capture part width or height is zero"));
+        }
+
+        if monitor_rect.size.width < width as f64 || monitor_rect.size.height < height as f64 {
+            return Err(XCapError::new(
+                "Capture part size is larger than monitor size",
+            ));
+        }
+
+        if x + width > monitor_rect.size.width as i32
+            || y + height > monitor_rect.size.height as i32
+        {
+            return Err(XCapError::new("Capture part x or y is out of bounds"));
+        }
+
         let cg_rect = CGRect::new(
-            CGPoint::new(x as f64, y as f64),
+            CGPoint::new(
+                monitor_rect.origin.x + x as f64,
+                monitor_rect.origin.y + y as f64,
+            ),
             CGSize::new(width as f64, height as f64),
         );
 
