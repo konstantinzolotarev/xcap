@@ -10,26 +10,24 @@ use super::{
     xorg_capture::xorg_capture,
 };
 
-pub fn capture_monitor(impl_monitor: &ImplMonitor) -> XCapResult<RgbaImage> {
+pub fn capture_full_monitor(impl_monitor: &ImplMonitor) -> XCapResult<RgbaImage> {
     let monitor_info_buf = get_monitor_info_buf(impl_monitor.output)?;
 
+    capture_monitor(
+        monitor_info_buf.x(),
+        monitor_info_buf.y(),
+        monitor_info_buf.width() as i32,
+        monitor_info_buf.height() as i32,
+    )
+}
+
+pub fn capture_monitor(x: i32, y: i32, width: i32, height: i32) -> XCapResult<RgbaImage> {
     if wayland_detect() {
-        wayland_capture(
-            monitor_info_buf.x() as i32,
-            monitor_info_buf.y() as i32,
-            monitor_info_buf.width() as i32,
-            monitor_info_buf.height() as i32,
-        )
+        wayland_capture(x, y, width, height)
     } else {
         let screen_buf = get_current_screen_buf()?;
 
-        xorg_capture(
-            screen_buf.root(),
-            monitor_info_buf.x() as i32,
-            monitor_info_buf.y() as i32,
-            monitor_info_buf.width() as u32,
-            monitor_info_buf.height() as u32,
-        )
+        xorg_capture(screen_buf.root(), x, y, width as u32, height as u32)
     }
 }
 

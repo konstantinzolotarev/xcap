@@ -279,6 +279,10 @@ impl ImplMonitor {
         capture_monitor(x, y, width as i32, height as i32)
     }
 
+    pub fn capture_part(&self, x: i32, y: i32, width: i32, height: i32) -> XCapResult<RgbaImage> {
+        capture_monitor(x, y, width, height)
+    }
+
     pub fn video_recorder(&self) -> XCapResult<(ImplVideoRecorder, Receiver<Frame>)> {
         ImplVideoRecorder::new(self.h_monitor)
     }

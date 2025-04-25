@@ -3,7 +3,7 @@ use std::sync::mpsc::Receiver;
 use image::RgbaImage;
 use objc2::MainThreadMarker;
 use objc2_app_kit::NSScreen;
-use objc2_core_foundation::CGPoint;
+use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_core_graphics::{
     CGDirectDisplayID, CGDisplayBounds, CGDisplayCopyDisplayMode, CGDisplayIsActive,
     CGDisplayIsBuiltin, CGDisplayIsMain, CGDisplayModeGetPixelWidth, CGDisplayModeGetRefreshRate,
@@ -198,6 +198,15 @@ impl ImplMonitor {
 
     pub fn capture_image(&self) -> XCapResult<RgbaImage> {
         let cg_rect = unsafe { CGDisplayBounds(self.cg_direct_display_id) };
+
+        capture(cg_rect, CGWindowListOption::OptionAll, 0)
+    }
+
+    pub fn capture_part(&self, x: i32, y: i32, width: i32, height: i32) -> XCapResult<RgbaImage> {
+        let cg_rect = CGRect::new(
+            CGPoint::new(x as f64, y as f64),
+            CGSize::new(width as f64, height as f64),
+        );
 
         capture(cg_rect, CGWindowListOption::OptionAll, 0)
     }
